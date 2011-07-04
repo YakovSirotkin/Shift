@@ -1,0 +1,77 @@
+<project name="Shift project" default="compile" basedir=".">
+
+
+    <!-- The directory containing source code -->
+    <property name="src.dir" value="src"/>
+    <property name="lib.dir" value="lib"/>
+    <property name="xsl.dir" value="xsl"/>
+    <property name="dataset" value="data/set8"/>
+    <property name="protein.database" value="prot.fasta"/>
+    <property name="xml.dir" value="${dataset}/xml"/>
+    <property name="html.dir" value="${dataset}/html"/>
+
+
+    <!-- Temporary build directories -->
+    <property name="build.dir" value="build"/>
+    <property name="build.classes" value="${build.dir}/classes"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+
+
+    <target name="compile" description="Compiles all source code.">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.classes}"/>
+
+        <javac srcdir="${src.dir}"
+               destdir="${build.classes}"
+               debug="on"
+               classpathref="classpath"
+               includeantruntime="on">
+        </javac>
+        <copy file="${src.dir}/log4j.xml" todir="${build.classes}"/>
+        <!-- Exclude unit tests from the final JAR file -->
+        <jar jarfile="shift.jar" basedir="${build.dir}/classes"/>
+    </target>
+
+
+    <target name="search" depends="compile">
+        <java classname="ru.spbau.bioinf.shift.ProteinFinder" failonerror="yes" fork="yes">
+            <arg value="${dataset}"/>
+            <arg value="${protein.database}"/>
+            <classpath>
+                <pathelement location="shift.jar"/>
+                <pathelement location="${lib.dir}/jdom.jar"/>
+                <pathelement location="${lib.dir}/log4j-1.2.15.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="render" depends="compile">
+        <java classname="ru.spbau.bioinf.shift.MatchRenderer" failonerror="yes" fork="yes">
+            <arg value="${dataset}"/>
+            <arg value="${protein.database}"/>
+            <classpath>
+                <pathelement location="shift.jar"/>
+                <pathelement location="${lib.dir}/jdom.jar"/>
+                <pathelement location="${lib.dir}/log4j-1.2.15.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="xslt">
+        <xslt in="${xsl.dir}/acid.xml" out="${html.dir}/acids.js"
+              style="${xsl.dir}/acids.xsl">
+            <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        </xslt>
+        <xslt basedir="${xml.dir}" destdir="${html.dir}" includes="spectrums/spectrum*.xml" extension=".html"
+              style="${xsl.dir}/spectrum.xsl">
+            <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        </xslt>
+    </target>
+
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+</project>
