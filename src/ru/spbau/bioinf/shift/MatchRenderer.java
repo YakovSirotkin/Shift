@@ -42,7 +42,7 @@ public class MatchRenderer {
         BufferedReader input = ReaderUtil.getBufferedReader(new File(msinputDir, "input_data"));
         List<Spectrum> spectrums = new ArrayList<Spectrum>();
         File outputDir = new File(datasetDir, "xml");
-        File msoutputDir = new File(datasetDir, "msouput");
+        File msoutputDir = new File(datasetDir, "msoutput");
         File matchFile = new File(msoutputDir, "match.txt");
 
         File xmlDir = new File(outputDir, "spectrums");
@@ -55,7 +55,7 @@ public class MatchRenderer {
             spectrums.add(spectrum);
         }
         log.debug("spectrums data loaded");
-        FastaReaderString fastaReader = new FastaReaderString(new File(msinputDir, proteinDatabaseFilename));
+        ProteinDatabaseReader fastaReader = new ProteinDatabaseReader(new File(msinputDir, proteinDatabaseFilename));
         List<Protein> proteins = fastaReader.getProteins();
 
         BufferedReader matchReader = ReaderUtil.getBufferedReader(matchFile);

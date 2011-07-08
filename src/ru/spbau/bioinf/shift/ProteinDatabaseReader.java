@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-public class FastaReaderString  {
+public class ProteinDatabaseReader {
 
     private ArrayList<Protein> proteins = new ArrayList<Protein>();
 
@@ -14,7 +14,7 @@ public class FastaReaderString  {
         return proteins;
     }
 
-    public FastaReaderString(File proteinDatabase)
+    public ProteinDatabaseReader(File proteinDatabase)
             throws Exception {
 
         BufferedReader input = new BufferedReader(new InputStreamReader(new FileInputStream(
