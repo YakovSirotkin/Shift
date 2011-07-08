@@ -178,17 +178,20 @@ public class ProteinFinder {
 
     public static int getScore(double[] sd, double[] pd, double shift) {
         int score = 0;
+        int i = 0;
         int j = 0;
-        for (int i = 0; i < pd.length; i++) {
-            while (j < sd.length && sd[j] < pd[i] - shift - 0.1) {
+        do {
+            double diff = sd[j] - pd[i] + shift;
+            if (diff < -0.1) {
+                j++;
+            } else if (diff > 0.1) {
+                i++;
+            } else {
+                score++;
+                i++;
                 j++;
             }
-            if (j < sd.length) {
-                if (Math.abs(sd[j] - pd[i] + shift) < 0.1) {
-                    score++;
-                }
-            }
-        }
+        } while (i < pd.length && j < sd.length);
         return score;
     }
 
