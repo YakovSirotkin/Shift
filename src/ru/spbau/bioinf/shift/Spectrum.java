@@ -74,6 +74,10 @@ public class Spectrum {
         return data;
     }
 
+    public void clearData() {
+        data = null;
+    }
+
     public void addToXml(Element parent, Map<Integer, List<Break>> breaks) {
         Element peaksTag = new Element("peaks");
         parent.addContent(peaksTag);
