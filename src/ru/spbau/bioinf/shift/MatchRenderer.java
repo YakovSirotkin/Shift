@@ -7,7 +7,6 @@ import ru.spbau.bioinf.shift.util.ReaderUtil;
 import ru.spbau.bioinf.shift.util.XmlUtil;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,34 +18,15 @@ public class MatchRenderer {
     private static final Logger log = Logger.getLogger(MatchRenderer.class);
 
     public static void main(String[] args) throws Exception {
-        String dataset = "data/set8";
-        String proteinDatabaseName = "prot.fasta";
-
-        if (args.length > 0) {
-            dataset = args[0];
-        }
-
-        if (args.length > 1) {
-            proteinDatabaseName = args[1];
-        }
-
+        Configuration config = new Configuration(args);
         MatchRenderer renderer = new MatchRenderer();
-
-
-        renderer.render(new File(dataset), proteinDatabaseName);
+        renderer.render(config);
     }
 
-    public void render(File datasetDir, String proteinDatabaseFilename) throws Exception {
+    public void render(Configuration config) throws Exception {
         log.debug("star result processing");
-        File msinputDir = new File(datasetDir, "msinput");
-        BufferedReader input = ReaderUtil.getBufferedReader(new File(msinputDir, "input_data"));
+        BufferedReader input = ReaderUtil.getBufferedReader(config.getSpectrumsFile());
         List<Spectrum> spectrums = new ArrayList<Spectrum>();
-        File outputDir = new File(datasetDir, "xml");
-        File msoutputDir = new File(datasetDir, "msoutput");
-        File matchFile = new File(msoutputDir, "match.txt");
-
-        File xmlDir = new File(outputDir, "spectrums");
-        xmlDir.mkdirs();
 
         Properties properties;
 
@@ -55,10 +35,10 @@ public class MatchRenderer {
             spectrums.add(spectrum);
         }
         log.debug("spectrums data loaded");
-        ProteinDatabaseReader fastaReader = new ProteinDatabaseReader(new File(msinputDir, proteinDatabaseFilename));
+        ProteinDatabaseReader fastaReader = new ProteinDatabaseReader(config.getProteinDatabaseFile());
         List<Protein> proteins = fastaReader.getProteins();
 
-        BufferedReader matchReader = ReaderUtil.getBufferedReader(matchFile);
+        BufferedReader matchReader = ReaderUtil.getBufferedReader(config.getMatchFile());
         HashMap<Integer, List<Integer>> res = new HashMap<Integer, List<Integer>>();
         String s;
         while ((s = matchReader.readLine()) != null) {
@@ -94,9 +74,8 @@ public class MatchRenderer {
             }
             root.addContent(matches);
 
-            XmlUtil.saveXml(doc, outputDir + "/spectrums/spectrum" + spectrum.getId() + ".xml");
+            XmlUtil.saveXml(doc, config.getSpectrumXmlFile(spectrum));
             log.debug("Match for spectrum " + spectrum.getId() + " saved");
-
         }
     }
 

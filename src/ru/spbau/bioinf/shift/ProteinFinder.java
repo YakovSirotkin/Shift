@@ -4,13 +4,8 @@ import org.apache.log4j.Logger;
 import ru.spbau.bioinf.shift.util.ReaderUtil;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,32 +23,43 @@ public class ProteinFinder {
     private List<Spectrum> spectrums;
     private PrintWriter matchFile;
     private Map<String,List<ProteinPosition>> index;
-    private File msoutputDir;
+
+    private Configuration config;
 
 
     public static void main(String[] args) throws Exception {
-        String dataset = "data/set8";
-        String proteinDatabaseName = "prot.fasta";
-
-        if (args.length > 0) {
-            dataset = args[0];
-        }
-
-        if (args.length > 1) {
-            proteinDatabaseName = args[1];
-        }
-
-        ProteinFinder processor = new ProteinFinder(new File(dataset), proteinDatabaseName);
+        Configuration config = new Configuration(args);
+        ProteinFinder processor = new ProteinFinder(config);
 
         processor.processAll();
     }
 
-    public ProteinFinder(File datasetDir, String proteinDatabaseFilename) throws Exception {
-        init(datasetDir, proteinDatabaseFilename);
+    public ProteinFinder(Configuration config) throws Exception {
+        this.config = config;
+        log.debug("star result processing");
+        BufferedReader input = ReaderUtil.getBufferedReader(config.getSpectrumsFile());
+        spectrums = new ArrayList<Spectrum>();
+
+        Properties properties;
+
+        while ((properties = ReaderUtil.readPropertiesUntil(input, "PRECURSOR_MASS")).size() > 0) {
+            Spectrum spectrum = new Spectrum(properties, input);
+            spectrums.add(spectrum);
+        }
+        log.debug("spectrums data loaded");
+        ProteinDatabaseReader databaseReader = new ProteinDatabaseReader(config.getProteinDatabaseFile());
+
+        proteins = databaseReader.getProteins();
+
+        log.debug("protein database loaded");
+
+        index = getIndex(proteins);
+
+        log.debug("index loaded");
     }
 
     public void processAll() throws Exception {
-        matchFile = createOutputFile(msoutputDir, "match.txt");
+        matchFile = ReaderUtil.createOutputFile(config.getMatchFile());
         int total = 0;
 
         for (Spectrum spectrum : spectrums) {
@@ -63,32 +69,6 @@ public class ProteinFinder {
         matchFile.close();
 
         log.debug("total = " + total);
-    }
-
-    private void init(File datasetDir, String proteinDatabaseFilename) throws Exception {
-        log.debug("star result processing");
-        File msinputDir = new File(datasetDir, "msinput");
-        BufferedReader input = ReaderUtil.getBufferedReader(new File(msinputDir, "input_data"));
-        spectrums = new ArrayList<Spectrum>();
-        msoutputDir = new File(datasetDir, "msoutput");
-        msoutputDir.mkdirs();
-
-        Properties properties;
-
-        while ((properties = ReaderUtil.readPropertiesUntil(input, "PRECURSOR_MASS")).size() > 0) {
-            Spectrum spectrum = new Spectrum(properties, input);
-            spectrums.add(spectrum);
-        }
-        log.debug("spectrums data loaded");
-        ProteinDatabaseReader databaseReader = new ProteinDatabaseReader(new File(msinputDir, proteinDatabaseFilename));
-
-        proteins = databaseReader.getProteins();
-
-        log.debug("protein database loaded");
-
-        index = getIndex(proteins);
-
-        log.debug("index loaded");
     }
 
     public Map<String, List<ProteinPosition>> getIndex(List<Protein> proteins) {
@@ -258,11 +238,5 @@ public class ProteinFinder {
         }
         a.add(sum / count);
         return a;
-    }
-
-    public static PrintWriter createOutputFile(File dir, String fileName)
-            throws UnsupportedEncodingException, FileNotFoundException {
-        return new PrintWriter(new OutputStreamWriter(
-                new FileOutputStream(new File(dir, fileName)), "UTF-8"));
     }
 }
