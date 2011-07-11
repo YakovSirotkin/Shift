@@ -3,7 +3,6 @@ package ru.spbau.bioinf.shift;
 import org.apache.log4j.Logger;
 import ru.spbau.bioinf.shift.util.ReaderUtil;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -11,7 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public class ProteinFinder {
 
@@ -19,7 +17,7 @@ public class ProteinFinder {
     private static final Logger log = Logger.getLogger(ProteinFinder.class);
 
     public static final double EPSILON = 0.01;
-    private ArrayList<Protein> proteins;
+    private List<Protein> proteins;
     private List<Spectrum> spectrums;
     private PrintWriter matchFile;
     private Map<String,List<ProteinPosition>> index;
@@ -37,19 +35,11 @@ public class ProteinFinder {
     public ProteinFinder(Configuration config) throws Exception {
         this.config = config;
         log.debug("star result processing");
-        BufferedReader input = ReaderUtil.getBufferedReader(config.getSpectrumsFile());
-        spectrums = new ArrayList<Spectrum>();
+        spectrums = config.getSpectrums();
 
-        Properties properties;
-
-        while ((properties = ReaderUtil.readPropertiesUntil(input, "PRECURSOR_MASS")).size() > 0) {
-            Spectrum spectrum = new Spectrum(properties, input);
-            spectrums.add(spectrum);
-        }
         log.debug("spectrums data loaded");
-        ProteinDatabaseReader databaseReader = new ProteinDatabaseReader(config.getProteinDatabaseFile());
 
-        proteins = databaseReader.getProteins();
+        proteins = config.getProteins();
 
         log.debug("protein database loaded");
 

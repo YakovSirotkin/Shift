@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public class MatchRenderer {
 
@@ -25,18 +24,10 @@ public class MatchRenderer {
 
     public void render(Configuration config) throws Exception {
         log.debug("star result processing");
-        BufferedReader input = ReaderUtil.getBufferedReader(config.getSpectrumsFile());
-        List<Spectrum> spectrums = new ArrayList<Spectrum>();
+        List<Spectrum> spectrums = config.getSpectrums();
 
-        Properties properties;
-
-        while ((properties = ReaderUtil.readPropertiesUntil(input, "PRECURSOR_MASS")).size() > 0) {
-            Spectrum spectrum = new Spectrum(properties, input);
-            spectrums.add(spectrum);
-        }
         log.debug("spectrums data loaded");
-        ProteinDatabaseReader fastaReader = new ProteinDatabaseReader(config.getProteinDatabaseFile());
-        List<Protein> proteins = fastaReader.getProteins();
+        List<Protein> proteins = config.getProteins();
 
         BufferedReader matchReader = ReaderUtil.getBufferedReader(config.getMatchFile());
         HashMap<Integer, List<Integer>> res = new HashMap<Integer, List<Integer>>();
