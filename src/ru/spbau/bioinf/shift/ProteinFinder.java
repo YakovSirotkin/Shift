@@ -24,6 +24,13 @@ public class ProteinFinder {
 
     private Configuration config;
 
+    public List<Protein> getProteins() {
+        return proteins;
+    }
+
+    public List<Spectrum> getSpectrums() {
+        return spectrums;
+    }
 
     public static void main(String[] args) throws Exception {
         Configuration config = new Configuration(args);
@@ -53,7 +60,7 @@ public class ProteinFinder {
         int total = 0;
 
         for (Spectrum spectrum : spectrums) {
-            total += processSpectrum(spectrum, proteins, index);
+            total += processSpectrum(spectrum);
             spectrum.clearData();
         }
         matchFile.close();
@@ -78,8 +85,23 @@ public class ProteinFinder {
         return ans;
     }
 
-    private int processSpectrum(Spectrum spectrum, List<Protein> proteins,  Map<String, List<ProteinPosition>> index) throws IOException {
+    private int processSpectrum(Spectrum spectrum) throws IOException {
         int ans = 0;
+        ArrayList<Match> best = getSpectrumMatches(spectrum);
+        if (best.size() > 0 && best.size() < 20) {
+            ans = 1;
+            for (Match match : best) {
+                matchFile.println(spectrum.getId() + " " + match.getProteinId() + " " + match.getScore());
+                matchFile.flush();
+            }
+            log.debug("Spectrum " + spectrum.getId() + " save with " + best.size() + " answers.");
+        } else {
+            log.debug("Spectrum " + spectrum.getId() + " is too bad, best.size() is " +  best.size());
+        }
+        return ans;
+    }
+
+    public ArrayList<Match> getSpectrumMatches(Spectrum spectrum) {
         int bestScore = 0;
         ArrayList<Match> best = new ArrayList<Match>();
         Map<String,List<Double>> positions = getPositions(spectrum);
@@ -113,17 +135,7 @@ public class ProteinFinder {
                 }
             }
         }
-        if (best.size() > 0 && best.size() < 20) {
-            ans = 1;
-            for (Match match : best) {
-                matchFile.println(spectrum.getId() + " " + match.getProteinId() + " " + match.getScore());
-                matchFile.flush();
-            }
-            log.debug("Spectrum " + spectrum.getId() + " save with " + best.size() + " answers.");
-        } else {
-            log.debug("Spectrum " + spectrum.getId() + " is too bad, best.size() is " +  best.size());
-        }
-        return ans;
+        return best;
     }
 
     public static List<Double> getShifts(Protein protein, Map<String, List<Double>> positions) {
@@ -207,6 +219,9 @@ public class ProteinFinder {
     }
 
     public static List<Double> merge(List<Double> v) {
+        if (v.size() == 0) {
+            return v;
+        }
         ArrayList<Double> a = new ArrayList<Double>();
         double prev = 0;
         int count = 0;
