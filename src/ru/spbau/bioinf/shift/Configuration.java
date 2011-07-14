@@ -67,6 +67,14 @@ public class Configuration {
         return new File(resultDir, "match.txt");
     }
 
+    public File getSecondMatchFile() {
+        return new File(resultDir, "match2.txt");
+    }
+
+    public File getPairsMatchFile() {
+        return new File(resultDir, "match_pairs.txt");
+    }
+
     public File getSpectrumXmlFile(Spectrum spectrum) {
         return new File(xmlSpectrumsDir, "spectrum" + spectrum.getId() + ".xml");
     }
