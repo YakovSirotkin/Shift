@@ -55,6 +55,10 @@ public class ReaderUtil {
         return Float.parseFloat(prop.getProperty(key));
     }
 
+    public static double getDoubleValue(Properties prop, String key) {
+        return Double.parseDouble(prop.getProperty(key));
+    }
+
     public static boolean getBooleanValue(Properties prop, String key) {
         return "true".equalsIgnoreCase(prop.getProperty(key));
     }
