@@ -1,15 +1,17 @@
 package ru.spbau.bioinf.shift;
 
+import org.jdom.Element;
+import ru.spbau.bioinf.shift.util.XmlUtil;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class Protein {
     private int proteinId;
     private String acids;
     private String simplifiedAcids = null;
     private double[] spectrum = null;
-
-    ArrayList<Double> shifts = new ArrayList<Double>();
-    ArrayList<Integer> shiftScores = new ArrayList<Integer>();
+    private List<SpectrumProteinMatch> matches = new ArrayList<SpectrumProteinMatch>();
 
     public Protein(int proteinId, String acids) {
         this.proteinId = proteinId;
@@ -40,5 +42,21 @@ public class Protein {
             }
         }
         return spectrum;
+    }
+
+    public void addSpectrumMatch(Spectrum spectrum) {
+          matches.add(new SpectrumProteinMatch(spectrum, this));
+    }
+
+    public Element toXml() {
+        Element p = new Element("protein");
+        XmlUtil.addElement(p, "acids", acids);
+        XmlUtil.addElement(p, "protein-id", proteinId);
+        Element spectrums = new Element("matches");
+        for (SpectrumProteinMatch match : matches) {
+            spectrums.addContent(match.toXml());
+        }
+        p.addContent(spectrums);
+        return p;
     }
 }

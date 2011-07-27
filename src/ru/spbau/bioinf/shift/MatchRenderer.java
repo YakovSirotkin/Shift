@@ -47,9 +47,8 @@ public class MatchRenderer {
             Spectrum spectrum = spectrums.get(spectrumId);
             List<Integer> proteinIds = entry.getValue();
             Document doc = new Document();
-            Element root = new Element("spectrum");
+            Element root = spectrum.toXml( new HashMap<Integer, List<Break>>());
             doc.setRootElement(root);
-            spectrum.addToXml(root, new HashMap<Integer, List<Break>>());
             Element matches = new Element("matches");
             for (int proteinId  : proteinIds) {
                 Protein protein  = proteins.get(proteinId);

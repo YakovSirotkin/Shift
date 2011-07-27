@@ -109,14 +109,15 @@ public class Spectrum {
         data = null;
     }
 
-    public void addToXml(Element parent, Map<Integer, List<Break>> breaks) {
+    public Element toXml(Map<Integer, List<Break>> breaks) {
+        Element spectrum = new Element("spectrum");
+        XmlUtil.addElement(spectrum, "scans", scans);
+        XmlUtil.addElement(spectrum, "spectrum-id", id);
+        XmlUtil.addElement(spectrum, "precursor-mz", precursorMz);
+        XmlUtil.addElement(spectrum, "precursor-charge", precursorCharge);
+        XmlUtil.addElement(spectrum, "precursor-mass", precursorMass);
         Element peaksTag = new Element("peaks");
-        parent.addContent(peaksTag);
-        XmlUtil.addElement(parent, "scans", scans);
-        XmlUtil.addElement(parent, "spectrum-id", id);
-        XmlUtil.addElement(parent, "precursor-mz", precursorMz);
-        XmlUtil.addElement(parent, "precursor-charge", precursorCharge);
-        XmlUtil.addElement(parent, "precursor-mass", precursorMass);
+        spectrum.addContent(peaksTag);
         for (int i = 0; i < peaks.size(); i++) {
             Peak peak = peaks.get(i);
             Element peakTag = new Element("peak");
@@ -124,5 +125,6 @@ public class Spectrum {
             XmlUtil.addElement(peakTag, "peak-id", i);
             peak.addToXml(peakTag, breaks.get(i));
         }
+        return spectrum;
     }
 }
