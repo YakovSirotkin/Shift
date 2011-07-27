@@ -17,6 +17,7 @@ public class Configuration {
     private File resultDir;
     private File xmlDir;
     private File xmlSpectrumsDir;
+    private File xmlProteinsDir;
 
 
     private File datasetDir;
@@ -39,6 +40,7 @@ public class Configuration {
         resultDir = createDir("result");
         xmlDir = createDir("xml");
         xmlSpectrumsDir = createDir(xmlDir, "spectrums");
+        xmlProteinsDir = createDir(xmlDir, "proteins");
 
         createDir("html");
     }
@@ -77,6 +79,14 @@ public class Configuration {
 
     public File getSpectrumXmlFile(Spectrum spectrum) {
         return new File(xmlSpectrumsDir, "spectrum" + spectrum.getId() + ".xml");
+    }
+
+    public File getProteinXmlFile(Protein protein) {
+        return new File(xmlProteinsDir, "protein" + protein.getProteinId() + ".xml");
+    }
+
+    public File getProteinXmlFile() {
+        return new File(xmlDir, "proteins.xml");
     }
 
     public List<Spectrum> getSpectrums() throws IOException {
