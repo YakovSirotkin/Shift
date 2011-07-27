@@ -69,6 +69,11 @@
               style="${xsl.dir}/spectrum.xsl">
             <factory name="net.sf.saxon.TransformerFactoryImpl"/>
         </xslt>
+        <xslt in="${xml.dir}/proteins.xml" out="${html.dir}/proteins-sp.html"
+              style="${xsl.dir}/proteins-sp.xsl">
+            <factory name="net.sf.saxon.TransformerFactoryImpl"/>
+        </xslt>
+
     </target>
 
     <target name="clean">
