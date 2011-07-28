@@ -6,21 +6,21 @@ import ru.spbau.bioinf.shift.util.XmlUtil;
 import java.util.List;
 
 public class Peak {
-    private float monoisotopicMass;
-    private float intensity;
+    private double monoisotopicMass;
+    private double intensity;
     private int charge;
 
-    public Peak(float monoisotopicMass, float intensity, int charge) {
+    public Peak(double monoisotopicMass, double intensity, int charge) {
         this.monoisotopicMass = monoisotopicMass;
         this.intensity = intensity;
         this.charge = charge;
     }
 
-    public float getMonoisotopicMass() {
+    public double getMonoisotopicMass() {
         return monoisotopicMass;
     }
 
-    public float getIntensity() {
+    public double getIntensity() {
         return intensity;
     }
 
