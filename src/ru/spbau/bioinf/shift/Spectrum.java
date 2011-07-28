@@ -32,7 +32,10 @@ public class Spectrum {
         precursorMass = ReaderUtil.getDoubleValue(prop, "PRECURSOR_MASS");
         List<String[]> datas = ReaderUtil.readDataUntil(input, "END IONS");
         for (String[] data : datas) {
-            peaks.add(new Peak(Float.parseFloat(data[0]), Float.parseFloat(data[1]), Integer.parseInt(data[2])));
+            double mass = Double.parseDouble(data[0]);
+            if (mass < precursorMass - 50) {
+                peaks.add(new Peak(mass, Double.parseDouble(data[1]), Integer.parseInt(data[2])));
+            }
         }
     }
 
@@ -60,9 +63,16 @@ public class Spectrum {
     public double[] getData() {
         if (data == null) {
             List<Double> d = new ArrayList<Double>();
+            d.add(0d);
+            d.add(precursorMass);
             for (Peak peak : peaks) {
                 double p = peak.getMonoisotopicMass();
-                d.addAll(getModifications(p));
+                List<Double> values = getModifications(p);
+                for (Double value : values) {
+                    if (value > 0 && value < precursorMass) {
+                        d.add(value);
+                    }
+                }
             }
             Collections.sort(d);
             d = ProteinFinder.merge(d);
