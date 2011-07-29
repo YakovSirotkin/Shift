@@ -6,25 +6,25 @@ import ru.spbau.bioinf.shift.util.XmlUtil;
 import java.util.ArrayList;
 
 public class Match {
-    private int score;
+    private double score;
     private String protein;
     private int proteinId;
 
     ArrayList<Double> shifts = new ArrayList<Double>();
-    ArrayList<Integer> shiftsScores = new ArrayList<Integer>();
+    ArrayList<Double> shiftsScores = new ArrayList<Double>();
 
     public Match(Protein protein) {
         this.protein = protein.getAcids();
         this.proteinId = protein.getProteinId();
     }
 
-    public Match(Protein protein, int score) {
+    public Match(Protein protein, double score) {
         this.score = score;
         this.protein = protein.getAcids();
         this.proteinId = protein.getProteinId();
     }
 
-    public void addShift(double v, int score) {
+    public void addShift(double v, double score) {
         shifts.add(v);
         shiftsScores.add(score);
     }
@@ -33,7 +33,7 @@ public class Match {
     }
 
 
-    public int getScore() {
+    public double getScore() {
         return score;
     }
 
