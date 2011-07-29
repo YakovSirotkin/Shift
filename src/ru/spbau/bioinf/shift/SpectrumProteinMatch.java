@@ -17,7 +17,7 @@ public class SpectrumProteinMatch {
     private int firstResidue;
     private double nMass;
 
-    public SpectrumProteinMatch(Spectrum spectrum, Protein protein) {
+    public SpectrumProteinMatch(Spectrum spectrum, Protein protein, ScoringFunction scoringFunction) {
         this.spectrum = spectrum;
         this.protein = protein;
         double[] sd = spectrum.getData();
@@ -25,7 +25,7 @@ public class SpectrumProteinMatch {
         Map<String,List<Double>> positions = ProteinFinder.getPositions(spectrum);
         List<Double> shiftsList = ProteinFinder.getShifts(protein, positions);
         for (double shift : shiftsList) {
-            double  score = ProteinFinder.getScore(sd, pd, shift);
+            double  score = scoringFunction.getScore(spectrum, protein, shift);
             shifts.put(shift, score);
             if (score > bestScore) {
                 bestScore = score;

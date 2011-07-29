@@ -38,11 +38,13 @@ public class SPFinder {
         Element root = new Element("proteins");
         doc.setRootElement(root);
 
+        ScoringFunction scoringFunction = config.getScoringFunction();
+
         for (Map.Entry<Integer, List<Integer>> entry : hits.entrySet()) {
             Protein protein = proteins.get(entry.getKey());
             List<Integer> matches = entry.getValue();
             for (int spectrumId : matches) {
-                protein.addSpectrumMatch(spectrums.get(spectrumId));
+                protein.addSpectrumMatch(new SpectrumProteinMatch(spectrums.get(spectrumId), protein, scoringFunction));
             }
             root.addContent(protein.toXml());
         }

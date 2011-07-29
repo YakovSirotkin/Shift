@@ -32,6 +32,8 @@ public class ProteinFinder {
         return spectrums;
     }
 
+    private ScoringFunction scoringFunction;
+
     public static void main(String[] args) throws Exception {
         Configuration config = new Configuration(args);
         ProteinFinder processor = new ProteinFinder(config);
@@ -51,6 +53,8 @@ public class ProteinFinder {
         log.debug("protein database loaded");
 
         index = getIndex(proteins);
+
+        scoringFunction = config.getScoringFunction();
 
         log.debug("index loaded");
     }
@@ -102,7 +106,7 @@ public class ProteinFinder {
     }
 
     public ArrayList<Match> getSpectrumMatches(Spectrum spectrum) {
-        int bestScore = 0;
+        double bestScore = 0;
         ArrayList<Match> best = new ArrayList<Match>();
         Map<String,List<Double>> positions = getPositions(spectrum);
 
@@ -115,7 +119,7 @@ public class ProteinFinder {
                 for (ProteinPosition pos : pp) {
                     int proteinId = pos.getProteinId();
                     for (double value : values) {
-                        int score = getScore(spectrum.getData(), proteins.get(proteinId).getSpectrum(), pos.getPos() - value);
+                        double score = scoringFunction.getScore(spectrum, proteins.get(proteinId), pos.getPos() - value);
                             if (score >= bestScore) {
                                 if (score > bestScore) {
                                     best.clear();
@@ -156,25 +160,6 @@ public class ProteinFinder {
         Collections.sort(shifts);
         shifts = merge(shifts);
         return shifts;
-    }
-
-    public static int getScore(double[] sd, double[] pd, double shift) {
-        int score = 0;
-        int i = 0;
-        int j = 0;
-        do {
-            double diff = sd[j] - pd[i] + shift;
-            if (diff < -0.1) {
-                j++;
-            } else if (diff > 0.1) {
-                i++;
-            } else {
-                score++;
-                i++;
-                j++;
-            }
-        } while (i < pd.length && j < sd.length);
-        return score;
     }
 
     public static Map<String, List<Double>> getPositions(Spectrum spectrum) {

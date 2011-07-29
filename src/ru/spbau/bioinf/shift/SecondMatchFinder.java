@@ -3,19 +3,16 @@ package ru.spbau.bioinf.shift;
 import ru.spbau.bioinf.shift.util.ReaderUtil;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 public class SecondMatchFinder {
 
     public static void main(String[] args) throws Exception {
         Configuration config = new Configuration(args);
-
+        ScoringFunction scoringFunction = config.getScoringFunction();
         ProteinFinder finder = new ProteinFinder(config);
         List<Spectrum> spectrums = finder.getSpectrums();
         List<Protein> proteins = finder.getProteins();
@@ -32,14 +29,13 @@ public class SecondMatchFinder {
             int proteinId = Integer.parseInt(data[1]);
             Spectrum sp = spectrums.get(spectrumId);
             Protein p = proteins.get(proteinId);
-            double[] sd = sp.getData();
             double[] pd = p.getSpectrum();
             Map<String,List<Double>> positions = ProteinFinder.getPositions(sp);
             List<Double> shifts = ProteinFinder.getShifts(p, positions);
-            int maxScore = 0;
+            double maxScore = 0;
             double bestShift = 0;
             for (double shift : shifts) {
-                int score = ProteinFinder.getScore(sd, pd, shift);
+                double score = scoringFunction.getScore(sp, p, shift);
                 if (score > maxScore) {
                     maxScore = score;
                     bestShift = shift;
@@ -50,11 +46,10 @@ public class SecondMatchFinder {
             maxScore = totalPeaksCount - left.getPeaks().size();
             positions = ProteinFinder.getPositions(left);
             shifts = ProteinFinder.getShifts(p, positions);
-            sd = left.getData();
-            int maxScoreLeft = 0;
+            double maxScoreLeft = 0;
             double bestShiftLeft = 0;
             for (double shift : shifts) {
-                int score = ProteinFinder.getScore(sd, pd, shift);
+                double score = scoringFunction.getScore(left, p, shift);
                 if (score > maxScoreLeft) {
                     maxScoreLeft = score;
                     bestShiftLeft = shift;

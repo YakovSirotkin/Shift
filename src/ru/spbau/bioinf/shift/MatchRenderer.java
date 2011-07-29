@@ -42,6 +42,8 @@ public class MatchRenderer {
             res.get(spectrumId).add(proteinId);
         }
 
+        ScoringFunction scoringFunction = config.getScoringFunction();
+
         for (Map.Entry<Integer, List<Integer>> entry : res.entrySet()) {
             int spectrumId = entry.getKey();
             Spectrum spectrum = spectrums.get(spectrumId);
@@ -52,13 +54,11 @@ public class MatchRenderer {
             Element matches = new Element("matches");
             for (int proteinId  : proteinIds) {
                 Protein protein  = proteins.get(proteinId);
-                double[] sd = spectrum.getData();
-                double[] pd = protein.getSpectrum();
                 Map<String,List<Double>> positions = ProteinFinder.getPositions(spectrum);
                 List<Double> shifts = ProteinFinder.getShifts(protein, positions);
                 Match m = new Match(protein);
                 for (double shift : shifts) {
-                    m.addShift(shift, ProteinFinder.getScore(sd, pd, shift));
+                    m.addShift(shift, scoringFunction.getScore(spectrum, protein, shift));
                 }
                 matches.addContent(m.toXml());
             }

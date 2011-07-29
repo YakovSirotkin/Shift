@@ -44,8 +44,8 @@ public class Protein {
         return spectrum;
     }
 
-    public void addSpectrumMatch(Spectrum spectrum) {
-          matches.add(new SpectrumProteinMatch(spectrum, this));
+    public void addSpectrumMatch(SpectrumProteinMatch match) {
+          matches.add(match);
     }
 
     public Element toXml() {
