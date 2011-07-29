@@ -19,8 +19,9 @@ public class Configuration {
     private File xmlSpectrumsDir;
     private File xmlProteinsDir;
 
-
     private File datasetDir;
+
+    private ScoringFunction scoringFunction;
 
     public Configuration(String args[]) {
         String dataset = "data/set8";
@@ -43,6 +44,11 @@ public class Configuration {
         xmlProteinsDir = createDir(xmlDir, "proteins");
 
         createDir("html");
+        scoringFunction = new SharedPeaksScoringFunction();
+    }
+
+    public ScoringFunction getScoringFunction() {
+        return scoringFunction;
     }
 
     private File createDir(String name) {
