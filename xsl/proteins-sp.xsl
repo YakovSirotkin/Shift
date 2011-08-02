@@ -38,12 +38,6 @@
                         return m;
                     }
 
-                    var proton = 1.007276;
-                    var isotope = 1.00235;
-                    var water = 18.010565;
-                    var ammonia = 17.0265;
-                    var oxygen = 15.9949;
-
 
                     function acidMass(a) {
                         for (var i = 0; acids.length > i; i++) {
@@ -58,21 +52,38 @@
 
                     var modes = [null, "plus", "minus",  "ammonia", "water",  "aw", "ww"]
 
-                    function check(v, total,  t) {
-                        for(var i = 0; modes.length > i; i++) {
-                            var m = getMass(v, modes[i]);
-                            if (0.1 > Math.abs(m - t)) {
-                                return m;
-                            }
-                            if (0.1 > Math.abs(total - m - t)) {
-                                return total - m;
+                    var proton = 1.007276;
+                    var isotope = 1.00235;
+                    var water = 18.010565;
+                    var ammonia = 17.0265;
+                    var oxygen = 15.9949;
+                    var CO = oxygen + 12;
+                    var H = 1.007825;
+                    var N = 10.04165;
+                    var NH = N + H;
+
+                    function check(p, total,  t) {
+                        var r = total - p - water;
+                        var m = [
+                                p, p + CO, p - NH,
+                                r, r + NH, r - CO,
+                                p-1, p+1, r-1, r+1, p - water, p - ammonia
+                            ];
+                            //24,0,1,13,1,1,4,6,12,8,3,3
+                        for(var i = 0; m.length > i; i++) {
+                            if (0.1 > Math.abs(m[i] - t)) {
+                                stat[i]++;
+                                return m[i];
                             }
                         }
                         return min - 1;
                     }
 
+                    var stat = [];
+
 
                     function renderMatch(protein, spectrum, shift, mass) {
+                        stat = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
                         var text = "&lt;font color='grey'>";
                         var targetMass = -shift ;
                         var grey = true;
@@ -97,6 +108,7 @@
                             text += add + protein.charAt(cur);
                             targetMass += acidMass(protein.charAt(cur));
                         }
+                        //text = stat + text
                         return text;
                     }
 
@@ -124,7 +136,8 @@
 
 
     <xsl:template match="spectrum">
-        <div>Match with spectrum #<a href="spectrums/spectrum{spectrum-id}.html"><xsl:value-of select="spectrum-id"/></a></div>
+        <div>Match with spectrum #<a href="http://msalign.ucsd.edu/set8-7/html/prsms/prsm{spectrum-id}.html"><xsl:value-of select="spectrum-id"/></a>
+            with shift <xsl:value-of select="../best-shift"/></div>
         <div id="spectrumj{spectrum-id}">
         </div>
         <div id="spectrum{spectrum-id}"></div>
