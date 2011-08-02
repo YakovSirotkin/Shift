@@ -16,7 +16,7 @@ public class ProteinFinder {
 
     private static final Logger log = Logger.getLogger(ProteinFinder.class);
 
-    public static final double EPSILON = 0.01;
+    public static final double EPSILON = 0.02;
     private List<Protein> proteins;
     private List<Spectrum> spectrums;
     private PrintWriter matchFile;
@@ -92,7 +92,7 @@ public class ProteinFinder {
     private int processSpectrum(Spectrum spectrum) throws IOException {
         int ans = 0;
         ArrayList<Match> best = getSpectrumMatches(spectrum);
-        if (best.size() > 0 && best.size() < 20) {
+        if (best.size() > 0 && best.size() < 2) {
             ans = 1;
             for (Match match : best) {
                 matchFile.println(spectrum.getId() + " " + match.getProteinId() + " " + match.getScore());
