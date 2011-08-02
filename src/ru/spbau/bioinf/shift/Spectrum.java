@@ -64,7 +64,7 @@ public class Spectrum {
         if (data == null) {
             List<Double> d = new ArrayList<Double>();
             d.add(0d);
-            d.add(precursorMass);
+            d.add(precursorMass - Consts.WATER);
             for (Peak peak : peaks) {
                 double p = peak.getMonoisotopicMass();
                 List<Double> values = getModifications(p);
@@ -86,10 +86,11 @@ public class Spectrum {
     }
 
     private List<Double> getModifications(double p) {
-        double r = precursorMass - p;
+        double r = precursorMass - p - Consts.WATER;
         return Arrays.asList(
-                p - 1, p, p + 1, p + Consts.AMMONIA, p + Consts.WATER,
-                r - 1, r, r + 1, r - Consts.AMMONIA, r - Consts.WATER);
+                p,// p + Consts.CO, p - Consts.NH,
+                r//, r + Consts.NH, r - Consts.CO
+        );
     }
 
     public Spectrum getLeft(double[] p, double shift) {
