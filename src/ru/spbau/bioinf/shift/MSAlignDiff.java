@@ -129,11 +129,62 @@ public class MSAlignDiff {
                         }
                         System.out.println(other.proteinId + " " + other.score);
                     }
-
                 }
+                spectrum.clearData();
             }
             System.out.println();
         }
+        Collections.sort(msHits);
+        int limit = 100 * 100;
+        int hl = limit/2;
+        int[] statB = new int[limit];
+        int[] statY = new int[limit];
+
+        for (MsMatch msHit : msHits) {
+            int spectrumId = msHit.spectrumId;
+            int proteinId = msHit.proteinId;
+            if (msHit.eValue < 0.000001 && new Integer(proteinId).equals(sHits.get(spectrumId))) {
+                Protein protein = proteins.get(proteinId);
+                SpectrumProteinMatch match = new SpectrumProteinMatch(spectrums.get(spectrumId), protein, scoringFunction);
+                double bestShift = match.getBestShift();
+                List<Double> sharedPeaks = new ArrayList<Double>();
+                Spectrum spectrum = spectrums.get(spectrumId);
+                double[] pd = protein.getSpectrum();
+                for (double v : pd) {
+                    sharedPeaks.add(v-bestShift);
+                }
+                spectrum.clearData();
+                List<Peak> peaks = spectrum.getPeaks();
+                for (Peak peak : peaks) {
+                    double m = peak.getMonoisotopicMass();
+                    double bestDiff = getBestDiff(sharedPeaks, m);
+                    int pos = hl + (int)Math.round(bestDiff * 100);
+                    if (pos > 0 && pos < limit) {
+                        statB[pos]++;
+                    }
+                    bestDiff = getBestDiff(sharedPeaks, spectrum.getPrecursorMass() - m - Consts.WATER);
+                    pos = hl + (int)Math.round(bestDiff * 100);
+                    if (pos > 0 && pos < limit) {
+                        statY[pos]++;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < limit; i++) {
+            if (statY[i] > 10) {
+                System.out.println(((i-hl)/100d) + " " + statY[i]);
+            }
+        }
+    }
+
+    private static double getBestDiff(List<Double> sharedPeaks, double m) {
+        double bestDiff = 10000;
+        for (double sharedPeak : sharedPeaks) {
+            if (Math.abs(bestDiff) > Math.abs(m - sharedPeak)) {
+                bestDiff = m - sharedPeak;
+            }
+        }
+        return bestDiff;
     }
 
     public static class MsMatch implements Comparable<MsMatch> {
