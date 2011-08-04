@@ -50,6 +50,10 @@ public class SpectrumProteinMatch {
         }
     }
 
+    public double getBestShift() {
+        return bestShift;
+    }
+
     public Element toXml(){
         Element match = new Element("match");
         match.addContent(spectrum.toXml(new HashMap<Integer, List<Break>>()));
