@@ -7,7 +7,6 @@ import ru.spbau.bioinf.shift.util.XmlUtil;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ public class Spectrum {
     private double precursorMass;
 
     private double[] data = null;
+    private double[] additionalSpectrum = null;
 
     public Spectrum(Properties prop, BufferedReader input) throws IOException {
         id = ReaderUtil.getIntValue(prop, "ID");
@@ -65,38 +65,42 @@ public class Spectrum {
             List<Double> d = new ArrayList<Double>();
             d.add(0d);
             d.add(precursorMass - Consts.WATER);
-            for (Peak peak : peaks) {
-                double p = peak.getMonoisotopicMass();
-                List<Double> values = getModifications(p);
-                for (Double value : values) {
-                    if (value > 0 && value < precursorMass) {
-                        d.add(value);
-                    }
-                }
-            }
-            Collections.sort(d);
-            d = ProteinFinder.merge(d);
-            data = new double[d.size()];
-            for (int i = 0; i < data.length; i++) {
-                data[i] = d.get(i);
-            }
+            data = generateMasses(d, Modifications.CORE);
         }
-
         return data;
     }
 
-    private List<Double> getModifications(double p) {
-        double r = precursorMass - p - Consts.WATER;
-        return Arrays.asList(
-                p,// p + Consts.CO, p - Consts.NH,
-                r//, r + Consts.NH, r - Consts.CO
-        );
+    private double[] generateMasses(List<Double> d, Modifications mod) {
+        for (Peak peak : peaks) {
+            double p = peak.getMonoisotopicMass();
+            List<Double> values = mod.getModifications(p, precursorMass);
+            for (Double value : values) {
+                if (value > 0 && value < precursorMass) {
+                    d.add(value);
+                }
+            }
+        }
+        Collections.sort(d);
+        d = ProteinFinder.merge(d);
+        double[] a = new double[d.size()];
+        for (int i = 0; i < a.length; i++) {
+            a[i] = d.get(i);
+        }
+        return a;
+    }
+
+    public double[] getAdditionalSpectrum() {
+        if (additionalSpectrum == null) {
+           List<Double> d = new ArrayList<Double>();
+            additionalSpectrum = generateMasses(d, Modifications.ADDITIONAL);
+        }
+        return additionalSpectrum;
     }
 
     public Spectrum getLeft(double[] p, double shift) {
         List<Peak> left = new ArrayList<Peak>();
         for (Peak peak : peaks) {
-            List<Double> mods = getModifications(peak.getMonoisotopicMass());
+            List<Double> mods = Modifications.CORE.getModifications(peak.getMonoisotopicMass(), precursorMass);
             boolean found = false;
             for (double mod : mods) {
                 for (double v : p) {
@@ -118,6 +122,7 @@ public class Spectrum {
 
     public void clearData() {
         data = null;
+        additionalSpectrum = null;
     }
 
     public Element toXml(Map<Integer, List<Break>> breaks) {
