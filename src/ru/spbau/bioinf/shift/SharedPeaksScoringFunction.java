@@ -4,6 +4,10 @@ public class SharedPeaksScoringFunction implements ScoringFunction {
 
     public double getScore(Spectrum spectrum, Protein protein, double shift) {
         double[] sd = spectrum.getData();
+        return getScore(sd, protein, shift);
+    }
+
+    protected double getScore(double[] sd, Protein protein, double shift) {
         double[] pd = protein.getSpectrum();
 
         int score = 0;
