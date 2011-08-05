@@ -24,6 +24,7 @@ public class SpectrumProteinMatch {
         double[] pd = protein.getSpectrum();
         Map<String,List<Double>> positions = ProteinFinder.getPositions(spectrum);
         List<Double> shiftsList = ProteinFinder.getShifts(protein, positions);
+        firstResidue = 10000;
         for (double shift : shiftsList) {
             double  score = scoringFunction.getScore(spectrum, protein, shift);
             shifts.put(shift, score);
@@ -32,6 +33,13 @@ public class SpectrumProteinMatch {
                 bestShift = shift;
             }
         }
+        if (bestScore > 0) {
+            findFirstResidue(sd, pd);
+            findFirstResidue(spectrum.getAdditionalSpectrum(), pd);
+        }
+    }
+
+    private void findFirstResidue(double[] sd, double[] pd) {
         int i = 0;
         int j = 0;
         do {
@@ -44,7 +52,8 @@ public class SpectrumProteinMatch {
                 break;
             }
         } while (i < pd.length && j < sd.length);
-        if (bestScore > 0) {
+
+        if (firstResidue > i) {
             firstResidue = i;
             nMass = sd[j];
         }
