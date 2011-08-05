@@ -12,10 +12,12 @@ public class Protein {
     private String simplifiedAcids = null;
     private double[] spectrum = null;
     private List<SpectrumProteinMatch> matches = new ArrayList<SpectrumProteinMatch>();
+    private String name;
 
-    public Protein(int proteinId, String acids) {
+    public Protein(int proteinId, String acids, String name) {
         this.proteinId = proteinId;
         this.acids = acids;
+        this.name = name;
     }
 
     public int getProteinId() {
@@ -52,6 +54,7 @@ public class Protein {
         Element p = new Element("protein");
         XmlUtil.addElement(p, "acids", acids);
         XmlUtil.addElement(p, "protein-id", proteinId);
+        XmlUtil.addElement(p, "name", name);
         Element spectrums = new Element("matches");
         for (SpectrumProteinMatch match : matches) {
             spectrums.addContent(match.toXml());

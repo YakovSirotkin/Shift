@@ -23,17 +23,19 @@ public class ProteinDatabaseReader {
         String s;
         String cur = "";
         int proteinId = 0;
+        String name = null;
         while ((s = input.readLine()) != null) {
             if (s.startsWith(">")) {
-                if (cur.length() > 0) {
-                    proteins.add(new Protein(proteinId, cur));
+                if (name != null) {
+                    proteins.add(new Protein(proteinId, cur, name));
                     proteinId++;
                     cur = "";
                 }
+                name = s.substring(1);
             } else {
                 cur += s.trim();
             }
         }
-        proteins.add(new Protein(proteinId, cur));
+        proteins.add(new Protein(proteinId, cur, name));
     }
 }
