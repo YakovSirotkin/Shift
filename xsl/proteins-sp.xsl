@@ -67,7 +67,7 @@
                         var m = [
                                 p,
                                 r,
-                                p-1, p+1, p + CO,
+                                p-1, p+1, p + CO,  p + water,
                                 r-1, r+1, r - ammonia, r - water, r + water
                             ];
                             //24,0,1,13,1,1,4,6,12,8,3,3
