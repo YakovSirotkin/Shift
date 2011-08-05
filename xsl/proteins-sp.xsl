@@ -59,15 +59,16 @@
                     var oxygen = 15.9949;
                     var CO = oxygen + 12;
                     var H = 1.007825;
-                    var N = 10.04165;
+                    var N = 14.0030740048;
                     var NH = N + H;
 
                     function check(p, total,  t) {
                         var r = total - p - water;
                         var m = [
-                                p, p + CO, p - NH,
-                                r, r + NH, r - CO,
-                                p-1, p+1, r-1, r+1, p - water, p - ammonia
+                                p,
+                                r,
+                                p-1, p+1, p + CO,
+                                r-1, r+1, r - ammonia, r - water, r + water
                             ];
                             //24,0,1,13,1,1,4,6,12,8,3,3
                         for(var i = 0; m.length > i; i++) {
@@ -122,14 +123,14 @@
     </xsl:template>
 
     <xsl:template match="protein">
-        <h2>Protein #<xsl:value-of select="protein-id"/> match</h2>
+        <h4>Protein #<xsl:value-of select="protein-id"/> - <xsl:value-of select="name"/></h4>
 
         <script>
             var protein<xsl:value-of select="protein-id"/> = '<xsl:apply-templates select="acids"/>';
         </script>
 
-        <xsl:apply-templates select="matches/match/spectrum">
-            <xsl:sort select="../first-residue" data-type="number"/>
+        <xsl:apply-templates select="matches/match[first-residue > 0]/spectrum">
+            <xsl:sort select="../n-mass" data-type="number"/>
         </xsl:apply-templates>
 
     </xsl:template>
@@ -137,22 +138,27 @@
 
     <xsl:template match="spectrum">
         <div>Match with spectrum #<a href="http://msalign.ucsd.edu/set8-7/html/prsms/prsm{spectrum-id}.html"><xsl:value-of select="spectrum-id"/></a>
-            with shift <xsl:value-of select="../best-shift"/></div>
-        <div id="spectrumj{spectrum-id}">
+            with score  <xsl:value-of select="../best-score"/></div>
+        <div id="spectrum{spectrum-id}">
         </div>
-        <div id="spectrum{spectrum-id}"></div>
+        <!--<div id="spectrum{spectrum-id}"></div>-->
         <script>
             var spectrum<xsl:value-of select="spectrum-id"/> =  [ 0
         <xsl:apply-templates select="peaks/peak"/>
             ];
+
             var s =
             "&lt;font color='grey'>" + protein<xsl:value-of select="../../../protein-id"/>.substr(0, <xsl:value-of select="../first-residue"/>) +
             "&lt;/font>&lt;br/>&lt;font color='red'>" + <xsl:value-of select="../n-mass"/>  + "&lt;/font>&lt;br/>"+
             protein<xsl:value-of select="../../../protein-id"/>.substr(<xsl:value-of select="../first-residue"/>);
-            document.getElementById("spectrumj<xsl:value-of select="spectrum-id"/>").innerHTML = s;
-
+            //document.getElementById("spectrumj<xsl:value-of select="spectrum-id"/>").innerHTML = s;
+            document.getElementById("spectrum<xsl:value-of select="spectrum-id"/>").innerHTML = renderMatch(
+                protein<xsl:value-of select="../../../protein-id"/>,
+                spectrum<xsl:value-of select="spectrum-id"/>,
+                <xsl:value-of select="../best-shift"/>,
+                <xsl:value-of select="precursor-mass"/>
+            );
         </script>
-        <a href="#" onclick="document.getElementById('spectrum{spectrum-id}').innerHTML=renderMatch(protein{../../../protein-id}, spectrum{spectrum-id},  {../best-shift}, {precursor-mass}); return false;">show breaks</a>
     </xsl:template>
 
     <xsl:template match="peak">
