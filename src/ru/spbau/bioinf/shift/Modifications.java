@@ -16,7 +16,7 @@ public enum Modifications {
         @Override
         List<Double> getModifications(double p, double precursorMass) {
             double r = precursorMass - p - Consts.WATER;
-            return Arrays.asList(p-1, p+1, p + Consts.CO, r-1, r+1, r - Consts.AMMONIA, r - Consts.WATER, r + Consts.WATER);
+            return Arrays.asList(p-1, p+1, p + Consts.CO, p + Consts.WATER, r-1, r+1, r - Consts.AMMONIA, r - Consts.WATER, r + Consts.WATER);
         }
     };
 
