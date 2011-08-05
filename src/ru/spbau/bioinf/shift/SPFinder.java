@@ -38,7 +38,7 @@ public class SPFinder {
         Element root = new Element("proteins");
         doc.setRootElement(root);
 
-        ScoringFunction scoringFunction = config.getScoringFunction();
+        ScoringFunction scoringFunction = new ExtendedSharedPeaksScoringFunction();
 
         for (Map.Entry<Integer, List<Integer>> entry : hits.entrySet()) {
             Protein protein = proteins.get(entry.getKey());
