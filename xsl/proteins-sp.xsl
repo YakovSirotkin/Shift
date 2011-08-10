@@ -137,7 +137,7 @@
 
 
     <xsl:template match="spectrum">
-        <div>Match with spectrum #<a href="http://msalign.ucsd.edu/set8-7/html/prsms/prsm{spectrum-id}.html"><xsl:value-of select="spectrum-id"/></a>
+        <div>Match with spectrum #<a href="spectrums/spectrum{spectrum-id}.html"><xsl:value-of select="spectrum-id"/></a>
             with score  <xsl:value-of select="../best-score"/></div>
         <div id="spectrum{spectrum-id}">
         </div>
