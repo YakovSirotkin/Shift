@@ -2,15 +2,11 @@ package ru.spbau.bioinf.shift;
 
 import org.apache.log4j.Logger;
 import org.jdom.Document;
-import org.jdom.Element;
 import ru.spbau.bioinf.shift.util.ReaderUtil;
 import ru.spbau.bioinf.shift.util.XmlUtil;
 
 import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MatchRenderer {
 
@@ -30,42 +26,18 @@ public class MatchRenderer {
         List<Protein> proteins = config.getProteins();
 
         BufferedReader matchReader = ReaderUtil.getBufferedReader(config.getMatchFile());
-        HashMap<Integer, List<Integer>> res = new HashMap<Integer, List<Integer>>();
         String s;
+        ScoringFunction scoringFunction = new ExtendedSharedPeaksScoringFunction();
         while ((s = matchReader.readLine()) != null) {
             String[] data = s.split(" ");
             int spectrumId = Integer.parseInt(data[0]);
             int proteinId = Integer.parseInt(data[1]);
-            if (!res.containsKey(spectrumId)) {
-                res.put(spectrumId, new ArrayList<Integer>());
-            }
-            res.get(spectrumId).add(proteinId);
-        }
-
-        ScoringFunction scoringFunction = config.getScoringFunction();
-
-        for (Map.Entry<Integer, List<Integer>> entry : res.entrySet()) {
-            int spectrumId = entry.getKey();
             Spectrum spectrum = spectrums.get(spectrumId);
-            List<Integer> proteinIds = entry.getValue();
+            Protein protein = proteins.get(proteinId);
+            SpectrumProteinMatch spm = new SpectrumProteinMatch(spectrum, protein, scoringFunction);
             Document doc = new Document();
-            Element root = spectrum.toXml( new HashMap<Integer, List<Break>>());
-            doc.setRootElement(root);
-            Element matches = new Element("matches");
-            for (int proteinId  : proteinIds) {
-                Protein protein  = proteins.get(proteinId);
-                Map<String,List<Double>> positions = ProteinFinder.getPositions(spectrum);
-                List<Double> shifts = ProteinFinder.getShifts(protein, positions);
-                Match m = new Match(protein);
-                for (double shift : shifts) {
-                    m.addShift(shift, scoringFunction.getScore(spectrum, protein, shift));
-                }
-                matches.addContent(m.toXml());
-            }
-            root.addContent(matches);
-
+            doc.setRootElement(spm.toXml());
             XmlUtil.saveXml(doc, config.getSpectrumXmlFile(spectrum));
-            log.debug("Match for spectrum " + spectrum.getId() + " saved");
         }
     }
 

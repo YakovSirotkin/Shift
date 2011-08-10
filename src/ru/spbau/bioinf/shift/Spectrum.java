@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class Spectrum {
@@ -56,10 +55,6 @@ public class Spectrum {
         return peaks;
     }
 
-    public int getPeakCharge(int peakId) {
-        return peaks.get(peakId).getCharge();
-    }
-
     public double[] getData() {
         if (data == null) {
             List<Double> d = new ArrayList<Double>();
@@ -100,7 +95,9 @@ public class Spectrum {
     public Spectrum getLeft(double[] p, double shift) {
         List<Peak> left = new ArrayList<Peak>();
         for (Peak peak : peaks) {
-            List<Double> mods = Modifications.CORE.getModifications(peak.getMonoisotopicMass(), precursorMass);
+            List<Double> mods = new ArrayList<Double>();
+            mods.addAll(Modifications.CORE.getModifications(peak.getMonoisotopicMass(), precursorMass));
+            mods.addAll(Modifications.ADDITIONAL.getModifications(peak.getMonoisotopicMass(), precursorMass));
             boolean found = false;
             for (double mod : mods) {
                 for (double v : p) {
@@ -125,7 +122,7 @@ public class Spectrum {
         additionalSpectrum = null;
     }
 
-    public Element toXml(Map<Integer, List<Break>> breaks) {
+    public Element toXml() {
         Element spectrum = new Element("spectrum");
         XmlUtil.addElement(spectrum, "scans", scans);
         XmlUtil.addElement(spectrum, "spectrum-id", id);
@@ -139,7 +136,7 @@ public class Spectrum {
             Element peakTag = new Element("peak");
             peaksTag.addContent(peakTag);
             XmlUtil.addElement(peakTag, "peak-id", i);
-            peak.addToXml(peakTag, breaks.get(i));
+            peak.addToXml(peakTag);
         }
         return spectrum;
     }

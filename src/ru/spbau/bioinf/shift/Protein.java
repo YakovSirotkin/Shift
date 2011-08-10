@@ -57,7 +57,7 @@ public class Protein {
         XmlUtil.addElement(p, "name", name);
         Element spectrums = new Element("matches");
         for (SpectrumProteinMatch match : matches) {
-            spectrums.addContent(match.toXml());
+            spectrums.addContent(match.toXmlWithoutProtein());
         }
         p.addContent(spectrums);
         return p;

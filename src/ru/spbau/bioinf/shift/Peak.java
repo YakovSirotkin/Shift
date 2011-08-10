@@ -3,8 +3,6 @@ package ru.spbau.bioinf.shift;
 import org.jdom.Element;
 import ru.spbau.bioinf.shift.util.XmlUtil;
 
-import java.util.List;
-
 public class Peak {
     private double monoisotopicMass;
     private double intensity;
@@ -28,16 +26,11 @@ public class Peak {
         return charge;
     }
 
-    public void addToXml(Element peak, List<Break> breaks) {
+    public void addToXml(Element peak) {
         XmlUtil.addElement(peak, "monoisotopic-mass", getMonoisotopicMass());
         XmlUtil.addElement(peak, "intensity", getIntensity());
         XmlUtil.addElement(peak, "charge", getCharge());
         Element matchesTag = new Element("breaks");
         peak.addContent(matchesTag);
-        if (breaks != null) {
-            for (Break aBreak : breaks) {
-                aBreak.addToXml(matchesTag);
-            }
-        }
     }
 }

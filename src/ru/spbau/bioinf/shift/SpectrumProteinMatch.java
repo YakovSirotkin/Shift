@@ -64,12 +64,30 @@ public class SpectrumProteinMatch {
     }
 
     public Element toXml(){
+        Element match = getXmlInternal();
+        match.addContent(protein.toXml());
+        return match;
+    }
+
+    public Element toXmlWithoutProtein(){
+        return getXmlInternal();
+    }
+
+    private Element getXmlInternal() {
         Element match = new Element("match");
-        match.addContent(spectrum.toXml(new HashMap<Integer, List<Break>>()));
+        match.addContent(spectrum.toXml());
         XmlUtil.addElement(match, "first-residue", firstResidue);
         XmlUtil.addElement(match, "n-mass", nMass);
         XmlUtil.addElement(match, "best-score", bestScore);
         XmlUtil.addElement(match, "best-shift", bestShift);
+        Element sh = new Element("shifts");
+        match.addContent(sh);
+        for (Map.Entry<Double, Double> entry : shifts.entrySet()) {
+            Element shift = new Element("shift");
+            XmlUtil.addElement(shift, "value", entry.getKey());
+            XmlUtil.addElement(shift, "score", entry.getValue());
+            sh.addContent(shift);
+        }
         return match;
     }
 }
