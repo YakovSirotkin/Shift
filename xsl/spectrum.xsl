@@ -187,7 +187,7 @@
                             table.deleteRow(1);
                         }
 
-                        unmatchedPeaks.sort(compareUnmatched);
+                        unmatchedPeaks.sort(compareMass);
                         for (var i = 0; unmatchedPeaks.length > i; i++) {
                             var p = unmatchedPeaks[i];
                             var row = table.insertRow(i+1);
@@ -201,6 +201,43 @@
                             if (p.id > 0) {
                                 renderMass(total - p.mass, c, 7, shift);
                             }
+                        }
+
+                        var g = [];
+                    for (var i = 0; unmatchedPeaks.length > i; i++){
+                        var p = unmatchedPeaks[i];
+                            g[g.length] = {mass: p.mass, reverse: 0, id: p.id};
+                            if (p.id > 0) {
+                                g[g.length] = {mass: total - p.mass, reverse: 1, id: p.id};
+                            }
+                        }
+                        g.sort(compareMass);
+                        table = document.getElementById("graph");
+                        while (table.rows.length > 1) {
+                            table.deleteRow(1);
+                        }
+                        var prev = -100000;
+                        for (var i = 0; g.length > i; i++) {
+                            var v = g[i];
+                            var row = table.insertRow(i+1);
+                            var c = [];
+                            for (var j = 0; 2 > j; j++) {
+                                c[j] = row.insertCell(j);
+                            }
+                            c[0].innerHTML = v.id;
+                            c[1].innerHTML = v.reverse == 0 ? v.mass : "(" + v.mass + ")";
+                            var pos = 2;
+                            for (var j = i; g.length > j; j++) {
+                                var diff = getAcid(g[j].mass - prev);
+                                if (diff. length == 1) {
+                                    c[pos] = row.insertCell(pos);
+                                    c[pos].rowSpan = j + 1 - i;
+                                    c[pos].innerHTML = diff;
+                                    pos++;
+                                }
+                            }
+
+                            prev = v.mass;
                         }
                     }
 
@@ -232,7 +269,7 @@
                     function getAcid(v) {
                         for (var i = 0; acids.length > i; i++) {
                             var acid = acids[i];
-                            if (0.01 > Math.abs(acid.monoMass -v)) {
+                            if (0.02 > Math.abs(acid.monoMass -v)) {
                                 return acid.letter;
                             }
                         }
@@ -245,7 +282,7 @@
                         return p1.dist - p2.dist;
                     }
 
-                    function compareUnmatched(p1, p2) {
+                    function compareMass(p1, p2) {
                         return p1.mass - p2.mass;
                     }
 
@@ -345,6 +382,10 @@
                 <h3>Distances between unmatched  peaks and the nearest cleavages in protein</h3>
                 <table id="unmatched" border="1">
                     <tr><th>Peak Id</th><th>b-ion</th><th colspan="5">b position</th><th>y-ion</th><th colspan="5">y-position</th></tr>
+                </table>
+                <h3>Amino acids between unmatched peaks</h3>
+                <table id="graph" border="1">
+                    <tr><th>Peak Id</th><th>Mass</th></tr>
                 </table>
                 <script>
                     proteins[<xsl:value-of select="../protein/protein-id"/>] = '<xsl:value-of select="../protein/acids"/>';
