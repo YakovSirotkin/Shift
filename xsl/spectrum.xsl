@@ -115,8 +115,15 @@
                         return true;
                     }
 
+                    var protein;
+
+                    var sharedPeaks;
+                    var describedPeaks;
+
                     function renderMatch(proteinId, shift) {
-                        var protein = proteins[proteinId];
+                        protein = proteins[proteinId];
+                        sharedPeaks = 0;
+                        describedPeaks = 0;
                         var text = "";
                         var targetMass = -shift ;
                         for (var i = 0; peaks.length > i; i++) {
@@ -142,6 +149,7 @@
                             }
                         }
                         var targetMass = -shift ;
+                        unmatchedPeaks = [];
                         for (var cur = 0; protein.length > cur; cur++) {
                             var b = [];
                             for (var i = 0; peaks.length > i; i++) {
@@ -171,10 +179,74 @@
                         }
                         text +=  br + br;
                         document.getElementById("p" + proteinId).innerHTML = text;
+                        document.getElementById("message").innerHTML =
+                            sharedPeaks + " matched peaks,  " + describedPeaks + " described peaks, " + unmatchedPeaks.length+ " unmatched peaks.";
+
+                        var table = document.getElementById("unmatched");
+                        while (table.rows.length > 1) {
+                            table.deleteRow(1);
+                        }
+
+                        unmatchedPeaks.sort(compareUnmatched);
+                        for (var i = 0; unmatchedPeaks.length > i; i++) {
+                            var p = unmatchedPeaks[i];
+                            var row = table.insertRow(i+1);
+                            var c = [];
+                            for (var j = 0; 13 > j; j++) {
+                                c[j] = row.insertCell(j);
+                            }
+
+                            c[0].innerHTML = p.id;
+                            renderMass(p.mass, c, 1, shift);
+                            if (p.id > 0) {
+                                renderMass(total - p.mass, c, 7, shift);
+                            }
+                        }
                     }
+
+                    function renderMass(m, c, start, shift) {
+                        c[start].innerHTML = m.toFixed(3);
+                        var targetMass = -shift ;
+                        for (var cur = 0; protein.length > cur; cur++) {
+                            var d = acidMass(protein.charAt(cur));
+                            if (targetMass + d > m) {
+                                c[start + 2].innerHTML = getAcid(m - targetMass);
+                                var s = "";
+                                s += cur > 0 ? protein.charAt(cur - 1) : "_";
+                                if (cur > 0) {
+                                    c[start + 1].innerHTML = getAcid(m - targetMass + acidMass(protein.charAt(cur - 1)));
+                                }
+                                s += protein.charAt(cur);
+                                s += protein.length - 1 > cur ? protein.charAt(cur + 1) : "_";
+                                if (protein.length - 1 > cur) {
+                                    c[start +5].innerHTML = getAcid(- m + targetMass + d + acidMass(protein.charAt(cur + 1)));
+                                }
+                                c[start + 3].innerHTML = s;
+                                c[start + 4].innerHTML = getAcid(- m + d + targetMass) ;
+                                break;
+                            }
+                            targetMass += d;
+                        }
+                    }
+
+                    function getAcid(v) {
+                        for (var i = 0; acids.length > i; i++) {
+                            var acid = acids[i];
+                            if (0.01 > Math.abs(acid.monoMass -v)) {
+                                return acid.letter;
+                            }
+                        }
+                        return v.toFixed(3);
+                    }
+
+                    var unmatchedPeaks = [];
 
                     function compareBreaks(p1, p2) {
                         return p1.dist - p2.dist;
+                    }
+
+                    function compareUnmatched(p1, p2) {
+                        return p1.mass - p2.mass;
                     }
 
                     function processShifts(proteinId) {
@@ -210,6 +282,7 @@
                     ];
 
                     var epsilon = 0.02;
+
                     function getText(p) {
                         var color="red";
                         var text= p.dist.toFixed(2);
@@ -226,22 +299,33 @@
                                 text = "end";
                             }
                         }
-                        if (p.reverse==0) {
-                            for (var i =0; bmod.length > i; i++) {
-                                if (epsilon > Math.abs(p.dist - bmod[i].value)) {
-                                    color = "yellowgreen";
-                                    text = bmod[i].text;
+                        if (p.id > 0) {
+                            if (p.reverse==0) {
+                                for (var i =0; bmod.length > i; i++) {
+                                    if (epsilon > Math.abs(p.dist - bmod[i].value)) {
+                                        color = "yellowgreen";
+                                        text = bmod[i].text;
+                                    }
+                                }
+                            }
+                            if (p.reverse==1) {
+                                for (var i =0; ymod.length > i; i++) {
+                                    if (epsilon > Math.abs(p.dist - ymod[i].value)) {
+                                        color = "yellowgreen";
+                                        text = ymod[i].text;
+                                    }
                                 }
                             }
                         }
-                        if (p.reverse==1) {
-                            for (var i =0; ymod.length > i; i++) {
-                                if (epsilon > Math.abs(p.dist - ymod[i].value)) {
-                                    color = "yellowgreen";
-                                    text = ymod[i].text;
-                                }
-                            }
+
+                        if (color == 'red') {
+                            unmatchedPeaks[unmatchedPeaks.length] = p;
+                        } else if (color == 'green') {
+                            sharedPeaks ++;
+                        } else {
+                            describedPeaks ++;
                         }
+
                         return "&lt;font color='" + color + "'>" + text + "&lt;/font>";
                     }
 
@@ -254,7 +338,14 @@
                 <div id="shifts{../protein/protein-id}">
                 </div>
 
+                <h3>Protein with peaks associated with the nearest cleavages</h3>
+                <p id="message"></p>
                 <p id="p{../protein/protein-id}" style="font-family: 'FreeMonoMedium', FreeMonoMedium, Miltonian, monospace;"></p>
+
+                <h3>Distances between unmatched  peaks and the nearest cleavages in protein</h3>
+                <table id="unmatched" border="1">
+                    <tr><th>Peak Id</th><th>b-ion</th><th colspan="5">b position</th><th>y-ion</th><th colspan="5">y-position</th></tr>
+                </table>
                 <script>
                     proteins[<xsl:value-of select="../protein/protein-id"/>] = '<xsl:value-of select="../protein/acids"/>';
                     var shifts =  [
