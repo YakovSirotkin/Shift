@@ -18,7 +18,7 @@ public class ProteinFinder {
 
     public static final double EPSILON = 0.02;
     private List<Protein> proteins;
-    private List<Spectrum> spectrums;
+    private Map<Integer, Spectrum> spectrums;
     private PrintWriter matchFile;
     private Map<String,List<ProteinPosition>> index;
 
@@ -28,7 +28,7 @@ public class ProteinFinder {
         return proteins;
     }
 
-    public List<Spectrum> getSpectrums() {
+    public Map<Integer, Spectrum> getSpectrums() {
         return spectrums;
     }
 
@@ -63,7 +63,7 @@ public class ProteinFinder {
         matchFile = ReaderUtil.createOutputFile(config.getMatchFile());
         int total = 0;
 
-        for (Spectrum spectrum : spectrums) {
+        for (Spectrum spectrum : spectrums.values()) {
             total += processSpectrum(spectrum);
             spectrum.clearData();
         }

@@ -7,6 +7,7 @@ import ru.spbau.bioinf.shift.util.XmlUtil;
 
 import java.io.BufferedReader;
 import java.util.List;
+import java.util.Map;
 
 public class MatchRenderer {
 
@@ -20,7 +21,7 @@ public class MatchRenderer {
 
     public void render(Configuration config) throws Exception {
         log.debug("star result processing");
-        List<Spectrum> spectrums = config.getSpectrums();
+        Map<Integer, Spectrum> spectrums = config.getSpectrums();
 
         log.debug("spectrums data loaded");
         List<Protein> proteins = config.getProteins();

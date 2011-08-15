@@ -15,7 +15,7 @@ public class MSAlignDiff {
         Configuration config = new Configuration(args);
 
         ProteinFinder finder = new ProteinFinder(config);
-        List<Spectrum> spectrums = finder.getSpectrums();
+        Map<Integer, Spectrum> spectrums = finder.getSpectrums();
         List<Protein> proteins = finder.getProteins();
 
         BufferedReader ms = ReaderUtil.getBufferedReader(new File(config.getMatchFile().getParent(), "ms_0001.txt"));
@@ -171,8 +171,8 @@ public class MSAlignDiff {
             }
         }
         for (int i = 0; i < limit; i++) {
-            if (statY[i] > 10) {
-                System.out.println(((i-hl)/100d) + " " + statY[i]);
+            if (statB[i] > 10) {
+                System.out.println(((i-hl)/100d) + " " + statB[i]);
             }
         }
     }

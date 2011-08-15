@@ -14,7 +14,7 @@ public class SecondMatchFinder {
         Configuration config = new Configuration(args);
         ScoringFunction scoringFunction = config.getScoringFunction();
         ProteinFinder finder = new ProteinFinder(config);
-        List<Spectrum> spectrums = finder.getSpectrums();
+        Map<Integer, Spectrum> spectrums = finder.getSpectrums();
         List<Protein> proteins = finder.getProteins();
 
         BufferedReader matchReader = ReaderUtil.getBufferedReader(config.getMatchFile());

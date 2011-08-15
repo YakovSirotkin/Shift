@@ -4,9 +4,11 @@ import ru.spbau.bioinf.shift.util.ReaderUtil;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class Configuration {
@@ -95,17 +97,43 @@ public class Configuration {
         return new File(xmlDir, "proteins.xml");
     }
 
-    public List<Spectrum> getSpectrums() throws IOException {
+    public Map<Integer, Spectrum> getSpectrums() throws IOException {
+        File scanDir = new File(inputDir, "env");
+        if (scanDir.exists()) {
+            return getScans(scanDir);
+        }
+
         BufferedReader input = ReaderUtil.getBufferedReader(getSpectrumsFile());
 
         Properties properties;
-        List<Spectrum> spectrums = new ArrayList<Spectrum>();
+        Map<Integer, Spectrum>  spectrums = new HashMap<Integer, Spectrum>();
         while ((properties = ReaderUtil.readPropertiesUntil(input, "PRECURSOR_MASS")).size() > 0) {
             Spectrum spectrum = new Spectrum(properties, input);
-            spectrums.add(spectrum);
+            spectrums.put(spectrum.getId(), spectrum);
         }
         return spectrums;
     }
+
+    private Map<Integer, Spectrum> getScans(File scanDir) throws IOException {
+        File[] files = scanDir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.getName().endsWith(".env");
+            }
+        });
+
+        Map<Integer, Spectrum> spectrums = new HashMap<Integer, Spectrum>();
+        for (File file : files) {
+            BufferedReader input = ReaderUtil.getBufferedReader(file);
+
+            Properties properties = ReaderUtil.readPropertiesUntil(input, "BEGIN ENVELOPE");
+            String fileName = file.getName();
+            int id = Integer.parseInt(fileName.substring(fileName.lastIndexOf("_") + 1, fileName.lastIndexOf(".")));
+            Spectrum spectrum = new Spectrum(properties, input, id);
+            spectrums.put(spectrum.getId(), spectrum);
+        }
+        return spectrums;
+    }
+
 
     public List<Protein> getProteins() throws Exception {
         ProteinDatabaseReader databaseReader = new ProteinDatabaseReader(getProteinDatabaseFile());
