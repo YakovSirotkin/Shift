@@ -38,6 +38,38 @@ public class Spectrum {
         }
     }
 
+    public Spectrum(Properties prop, BufferedReader input, int scanId) throws IOException {
+        id = scanId;
+        precursorCharge = ReaderUtil.getIntValue(prop, "CHARGE");
+        precursorMass = ReaderUtil.getDoubleValue(prop, "MONOISOTOPIC_MASS");
+        List<String[]> datas;
+        while ((datas = ReaderUtil.readDataUntil(input, "END ENVELOPE")).size() > 0) {
+            double mass = 0;
+            double score = 0;
+            int charge = 0;
+
+            for (String[] data : datas) {
+                if (data.length > 3) {
+                    if ("REAL_MONO_MASS".equals(data[2])) {
+                        mass = Double.parseDouble(data[3]);
+                    }
+                }
+                if ("CHARGE".equals(data[0])) {
+                    charge = Integer.parseInt(data[1]);
+                }
+                if ("SCORE".equals(data[0])) {
+                    score = Double.parseDouble(data[1]);
+                }
+            }
+            if (mass < precursorMass - 50) {
+                peaks.add(new Peak(mass, score , charge));
+            }
+            if (mass == 0) {
+                break;
+            }
+        }
+    }
+
     public Spectrum(List<Peak> peaks, double precursorMass) {
         this.precursorMass = precursorMass;
         this.peaks = peaks;
