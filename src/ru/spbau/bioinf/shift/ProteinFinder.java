@@ -92,15 +92,25 @@ public class ProteinFinder {
     private int processSpectrum(Spectrum spectrum) throws IOException {
         int ans = 0;
         ArrayList<Match> best = getSpectrumMatches(spectrum);
+        int spectrumId = spectrum.getId();
         if (best.size() > 0 && best.size() < 2) {
             ans = 1;
             for (Match match : best) {
-                matchFile.println(spectrum.getId() + " " + match.getProteinId() + " " + match.getScore());
+                matchFile.println(spectrumId + " " + match.getProteinId() + " " + match.getScore());
                 matchFile.flush();
             }
-            log.debug("Spectrum " + spectrum.getId() + " save with " + best.size() + " answers.");
+            log.debug("Spectrum " + spectrumId + " save with " + best.size() + " answers.");
         } else {
-            log.debug("Spectrum " + spectrum.getId() + " is too bad, best.size() is " +  best.size());
+            if (best.size() == 0) {
+                int tagsCount = getPositions(spectrum).size();
+                if (tagsCount > 0) {
+                    log.debug("There were " + tagsCount + " PSTs for spectrum " + spectrumId +  ", but no matches.");
+                } else {
+                    log.debug("No PST found for spectrum " + spectrumId + ".");
+                }
+            } else {
+                log.debug("Spectrum " + spectrumId + " is too often, best.size() is " +  best.size() + ".");
+            }
         }
         return ans;
     }
