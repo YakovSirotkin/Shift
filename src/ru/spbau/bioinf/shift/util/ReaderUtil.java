@@ -20,6 +20,12 @@ public class ReaderUtil {
         Properties ans = new Properties();
         while ((s = result.readLine())!= null) {
             int equalIndex = s.indexOf("=");
+            if (equalIndex < 0) {
+                equalIndex = s.indexOf(" ");
+                if (equalIndex == 0 || equalIndex == s.length() -1) {
+                    equalIndex = 0;
+                }
+            }
             if (equalIndex > 0) {
                 ans.put(s.substring(0, equalIndex).trim(), s.substring(equalIndex + 1).trim());
             }
@@ -32,7 +38,10 @@ public class ReaderUtil {
     public static List<String[]> readDataUntil(BufferedReader result, String sign) throws IOException {
         String s;
         List<String[]> ans = new ArrayList<String[]>();
-        while (!(s = result.readLine()).equalsIgnoreCase(sign)) {
+        while ((s = result.readLine()) != null) {
+            if (s.equalsIgnoreCase(sign)) {
+                break;
+            }
             ans.add(getDataArray(s));
         }
         return ans;
