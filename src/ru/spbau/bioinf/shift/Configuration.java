@@ -5,6 +5,7 @@ import ru.spbau.bioinf.shift.util.ReaderUtil;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.Properties;
 
 public class Configuration {
 
-    private String proteinDatabaseName;
+    private File proteinDatabase;
 
     private File inputDir;
     private File resultDir;
@@ -27,19 +28,24 @@ public class Configuration {
 
     public Configuration(String args[]) {
         String dataset = "data/set8";
-        proteinDatabaseName = "prot.fasta";
-
         if (args != null) {
             if (args.length > 0) {
                 dataset = args[0];
             }
-
-            if (args.length > 1) {
-                proteinDatabaseName = args[1];
-            }
         }
         datasetDir = new File(dataset);
         inputDir = createDir("input");
+        File[] proteinDatabases = inputDir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".fasta");
+            }
+        });
+        if (proteinDatabases.length == 1) {
+            proteinDatabase = proteinDatabases[0];
+        } else {
+            proteinDatabase = new File(inputDir, args[1]);
+        }
+
         resultDir = createDir("result");
         xmlDir = createDir("xml");
         xmlSpectrumsDir = createDir(xmlDir, "spectrums");
@@ -70,7 +76,7 @@ public class Configuration {
     }
 
     public File getProteinDatabaseFile() {
-        return new File(inputDir, proteinDatabaseName);
+        return proteinDatabase;
     }
 
     public File getMatchFile() {
