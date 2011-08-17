@@ -91,6 +91,10 @@ public class Configuration {
         return new File(resultDir, "match_pairs.txt");
     }
 
+    public File getSignalPeptidesFile() {
+        return new File(resultDir, "sp.fasta");
+    }
+
     public File getSpectrumXmlFile(Spectrum spectrum) {
         return new File(xmlSpectrumsDir, "spectrum" + spectrum.getId() + ".xml");
     }
