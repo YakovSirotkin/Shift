@@ -39,6 +39,28 @@ public class SpectrumProteinMatch {
         }
     }
 
+    public boolean hasSignalPeptide() {
+        return firstResidue > 1 && nMass < 1000;
+    }
+
+    public String getSignalPeptideInfo() {
+        String prefix = protein.getAcids().substring(0, firstResidue);
+        String ans = "";
+        int removed = 0;
+        int mIndex = 0;
+        while (mIndex >= 0) {
+            ans +=  ">#" + spectrum.getId() + " " +  bestScore + " " + nMass + " " + protein.getName() + " " + " " + removed + " " +
+            prefix.length() + " " + prefix.substring(0, Math.min(30, prefix.length())) +
+            "\n" + prefix + "\n";
+            mIndex = prefix.indexOf("M", 1);
+            removed += mIndex;
+            if (mIndex > 0) {
+                prefix = prefix.substring(mIndex);
+            }
+        }
+        return ans;
+    }
+
     private void findFirstResidue(double[] sd, double[] pd) {
         int i = 0;
         int j = 0;
