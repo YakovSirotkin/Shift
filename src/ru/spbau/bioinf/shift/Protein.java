@@ -28,6 +28,10 @@ public class Protein {
         return acids;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public String getSimplifiedAcids() {
         if (simplifiedAcids == null) {
             simplifiedAcids = acids.replaceAll("L", "I").replaceAll("Z", "Q").replaceAll("B", "E").replaceAll("X", "I");
