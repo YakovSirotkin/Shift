@@ -6,6 +6,7 @@ import ru.spbau.bioinf.shift.util.ReaderUtil;
 import ru.spbau.bioinf.shift.util.XmlUtil;
 
 import java.io.BufferedReader;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,14 +41,21 @@ public class SPFinder {
 
         ScoringFunction scoringFunction = new ExtendedSharedPeaksScoringFunction();
 
+        PrintWriter sp = ReaderUtil.createOutputFile(config.getSignalPeptidesFile());
+
         for (Map.Entry<Integer, List<Integer>> entry : hits.entrySet()) {
             Protein protein = proteins.get(entry.getKey());
             List<Integer> matches = entry.getValue();
             for (int spectrumId : matches) {
-                protein.addSpectrumMatch(new SpectrumProteinMatch(spectrums.get(spectrumId), protein, scoringFunction));
+                SpectrumProteinMatch match = new SpectrumProteinMatch(spectrums.get(spectrumId), protein, scoringFunction);                
+                protein.addSpectrumMatch(match);
+                if (match.hasSignalPeptide()) {
+                    sp.println(match.getSignalPeptideInfo());
+                }
             }
             root.addContent(protein.toXml());
         }
+        sp.close();
 
         XmlUtil.saveXml(doc, config.getProteinXmlFile());
     }
