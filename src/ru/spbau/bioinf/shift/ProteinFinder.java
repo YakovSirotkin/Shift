@@ -96,7 +96,7 @@ public class ProteinFinder {
         if (best.size() > 0 && best.size() < 2) {
             ans = 1;
             for (Match match : best) {
-                matchFile.println(spectrumId + " " + match.getProteinId() + " " + match.getScore());
+                matchFile.println(spectrumId + " " + match.getProteinId() + " " + match.getScore() + " " + match.getShift());
                 matchFile.flush();
             }
             log.debug("Spectrum " + spectrumId + " save with " + best.size() + " answers.");
@@ -129,7 +129,8 @@ public class ProteinFinder {
                 for (ProteinPosition pos : pp) {
                     int proteinId = pos.getProteinId();
                     for (double value : values) {
-                        double score = scoringFunction.getScore(spectrum, proteins.get(proteinId), pos.getPos() - value);
+                        double shift = pos.getPos() - value;
+                        double score = scoringFunction.getScore(spectrum, proteins.get(proteinId), shift);
                             if (score >= bestScore) {
                                 if (score > bestScore) {
                                     best.clear();
@@ -137,11 +138,12 @@ public class ProteinFinder {
                                 boolean contains = false;
                                 for (Match matchOld : best) {
                                     if (matchOld.getProteinId() == proteinId) {
+                                        matchOld.update(score, shift);
                                         contains = true;
                                     }
                                 }
                                 if (!contains) {
-                                    best.add(new Match(proteins.get(proteinId), score));
+                                    best.add(new Match(proteins.get(proteinId), score, shift));
                                 }
                                 bestScore = score;
                             }

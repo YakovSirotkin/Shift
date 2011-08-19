@@ -9,6 +9,7 @@ public class Match {
     private double score;
     private String protein;
     private int proteinId;
+    private double shift;
 
     ArrayList<Double> shifts = new ArrayList<Double>();
     ArrayList<Double> shiftsScores = new ArrayList<Double>();
@@ -18,10 +19,18 @@ public class Match {
         this.proteinId = protein.getProteinId();
     }
 
-    public Match(Protein protein, double score) {
+    public Match(Protein protein, double score, double shift) {
         this.score = score;
         this.protein = protein.getAcids();
         this.proteinId = protein.getProteinId();
+        this.shift = shift;
+    }
+
+    public void update(double score, double shift) {
+        if (score > this.score) {
+            this.score = score;
+            this.shift = shift;
+        }
     }
 
     public void addShift(double v, double score) {
@@ -35,6 +44,10 @@ public class Match {
 
     public double getScore() {
         return score;
+    }
+
+    public double getShift() {
+        return shift;
     }
 
     public Element toXml() {
