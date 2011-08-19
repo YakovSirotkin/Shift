@@ -63,7 +63,7 @@
                     var NH = N + H;
 
                     function check(p, total,  t) {
-                        var r = total - p - water;
+                        var r = total - p - 0.035;
                         var m = [
                                 p,
                                 r,
@@ -72,7 +72,7 @@
                             ];
                             //24,0,1,13,1,1,4,6,12,8,3,3
                         for(var i = 0; m.length > i; i++) {
-                            if (0.1 > Math.abs(m[i] - t)) {
+                            if (0.02 > Math.abs(m[i] - t)) {
                                 stat[i]++;
                                 return m[i];
                             }
