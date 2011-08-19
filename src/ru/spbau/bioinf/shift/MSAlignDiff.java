@@ -157,12 +157,12 @@ public class MSAlignDiff {
                 List<Peak> peaks = spectrum.getPeaks();
                 for (Peak peak : peaks) {
                     double m = peak.getMonoisotopicMass();
-                    double bestDiff = getBestDiff(sharedPeaks, m);
+                    double bestDiff = IonStatisticsEngine.getBestDiff(sharedPeaks, m);
                     int pos = hl + (int)Math.round(bestDiff * 100);
                     if (pos > 0 && pos < limit) {
                         statB[pos]++;
                     }
-                    bestDiff = getBestDiff(sharedPeaks, spectrum.getPrecursorMass() - m - Consts.WATER);
+                    bestDiff = IonStatisticsEngine.getBestDiff(sharedPeaks, spectrum.getPrecursorMass() - m - Consts.WATER);
                     pos = hl + (int)Math.round(bestDiff * 100);
                     if (pos > 0 && pos < limit) {
                         statY[pos]++;
@@ -175,16 +175,6 @@ public class MSAlignDiff {
                 System.out.println(((i-hl)/100d) + " " + statB[i]);
             }
         }
-    }
-
-    private static double getBestDiff(List<Double> sharedPeaks, double m) {
-        double bestDiff = 10000;
-        for (double sharedPeak : sharedPeaks) {
-            if (Math.abs(bestDiff) > Math.abs(m - sharedPeak)) {
-                bestDiff = m - sharedPeak;
-            }
-        }
-        return bestDiff;
     }
 
     public static class MsMatch implements Comparable<MsMatch> {
