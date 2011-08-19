@@ -62,7 +62,7 @@
 
                     var proteins = [];
 
-                    var total = <xsl:value-of select="precursor-mass"/> - water;
+                    var total = <xsl:value-of select="precursor-mass"/> - 0.035;
                     var peaks = [
                                 {
                                     id: -1,
