@@ -24,7 +24,7 @@ public class SpectrumProteinMatch {
         double[] pd = protein.getSpectrum();
         Map<String,List<Double>> positions = ProteinFinder.getPositions(spectrum);
         List<Double> shiftsList = ProteinFinder.getShifts(protein, positions);
-        firstResidue = 10000;
+        firstResidue = 1000000;
         for (double shift : shiftsList) {
             double  score = scoringFunction.getScore(spectrum, protein, shift);
             shifts.put(shift, score);
@@ -40,7 +40,7 @@ public class SpectrumProteinMatch {
     }
 
     public boolean hasSignalPeptide() {
-        return firstResidue > 1 && nMass < 1000;
+        return firstResidue > 1 && nMass < 1000 && firstResidue < 10000;
     }
 
     public String getSignalPeptideInfo() {
@@ -49,9 +49,11 @@ public class SpectrumProteinMatch {
         int removed = 0;
         int mIndex = 0;
         while (mIndex >= 0) {
-            ans +=  ">#" + spectrum.getId() + " " +  bestScore + " " + nMass + " " + protein.getName() + " " + " " + removed + " " +
-            prefix.length() + " " + prefix.substring(0, Math.min(30, prefix.length())) +
-            "\n" + prefix + "\n";
+            if (prefix.length() < 8500) {
+                ans +=  ">#" + spectrum.getId() + " " +  bestScore + " " + nMass + " " + protein.getName() + " " + " " + removed + " " +
+                prefix.length() + " " + prefix.substring(0, Math.min(30, prefix.length())) +
+                "\n" + prefix + "\n";
+            }
             mIndex = prefix.indexOf("M", 1);
             removed += mIndex;
             if (mIndex > 0) {
