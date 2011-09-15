@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ public class Configuration {
     private File datasetDir;
 
     private ScoringFunction scoringFunction;
+    private File inputData;
 
     public Configuration(String args[]) {
         String dataset = "data/set8";
@@ -45,6 +47,20 @@ public class Configuration {
         } else {
             proteinDatabase = new File(inputDir, args[1]);
         }
+
+        inputData = new File(inputDir, "input_data");
+
+        if (!inputData.exists()) {
+            File[] msalignFiles = inputDir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.endsWith(".msalign");
+                }
+            });
+            if (msalignFiles.length == 1) {
+                inputData = msalignFiles[0];
+            }
+        }
+
 
         resultDir = createDir("result");
         xmlDir = createDir("xml");
@@ -72,7 +88,7 @@ public class Configuration {
     }
 
     public File getSpectrumsFile() {
-        return new File(inputDir, "input_data");
+        return inputData;
     }
 
     public File getProteinDatabaseFile() {
@@ -122,6 +138,19 @@ public class Configuration {
             spectrums.put(spectrum.getId(), spectrum);
         }
         return spectrums;
+    }
+
+    public List<MSAlignDiff.MsMatch> getMSAlignResults() throws IOException {
+        File resultFile = new File(resultDir, "target_result_detail");
+
+        BufferedReader input = ReaderUtil.getBufferedReader(resultFile);
+
+        Properties properties;
+        List<MSAlignDiff.MsMatch> ans = new ArrayList<MSAlignDiff.MsMatch>();
+        while ((properties = ReaderUtil.readPropertiesUntil(input, "END PRSM")).size() > 0) {
+            ans.add(new MSAlignDiff.MsMatch(properties));
+        }
+        return ans;
     }
 
     private Map<Integer, Spectrum> getScans(File scanDir) throws IOException {
