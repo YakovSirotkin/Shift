@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 public class MSAlignDiff {
     public static void main(String[] args) throws Exception {
@@ -18,17 +19,14 @@ public class MSAlignDiff {
         Map<Integer, Spectrum> spectrums = finder.getSpectrums();
         List<Protein> proteins = finder.getProteins();
 
-        BufferedReader ms = ReaderUtil.getBufferedReader(new File(config.getMatchFile().getParent(), "ms_0001.txt"));
-        BufferedReader sh = ReaderUtil.getBufferedReader(new File(config.getMatchFile().getParent(), "match02.txt"));
+        BufferedReader sh = ReaderUtil.getBufferedReader(config.getMatchFile());
 
 
-        List<MsMatch> msHits = new ArrayList<MsMatch>();
+        List<MsMatch> msHits = config.getMSAlignResults();
         Map<Integer, Integer> msStat = new HashMap<Integer, Integer>();
-        String s;
-        while ((s = ms.readLine()) != null) {
-            MsMatch m = new MsMatch(s);
-            msHits.add(m);
-            int proteinId = m.proteinId;
+
+        for (MsMatch msHit : msHits) {
+            int proteinId = msHit.proteinId;
             if (!msStat.containsKey(proteinId)) {
                 msStat.put(proteinId, 0);
             }
@@ -36,6 +34,7 @@ public class MSAlignDiff {
         }
 
         Map<Integer, Integer> sHits = new HashMap<Integer, Integer>();
+        String s;
         while ((s = sh.readLine()) != null) {
             String[] data = s.split(" ");
             int spectrumId = Integer.parseInt(data[0]);
@@ -70,7 +69,7 @@ public class MSAlignDiff {
         for (MsMatch m : wrong) {
             int spectrumId = m.spectrumId;
             int proteinId = m.proteinId;
-            System.out.println(spectrumId + " " + proteinId + " " + m.eValue + " http://msalign.ucsd.edu/set8-7/html/prsms/prsm" + spectrumId + ".html");
+            System.out.println(spectrumId + " " + proteinId + " " + m.eValue + " html/prsms/prsm" + spectrumId + ".html");
             System.out.println(msStat.get(proteinId) + " matches for this protein were reported by MS-align.");
             Spectrum spectrum = spectrums.get(spectrumId);
             Map<String,List<Double>> positions = ProteinFinder.getPositions(spectrum);
@@ -181,6 +180,12 @@ public class MSAlignDiff {
         int proteinId;
         int spectrumId;
         double eValue;
+
+        public MsMatch(Properties prop) {
+            spectrumId = Integer.parseInt(prop.getProperty("SPECTRUM_ID"));
+            proteinId = Integer.parseInt(prop.getProperty("SEQUENCE_ID"));
+            eValue = Double.parseDouble(prop.getProperty("E_VALUE"));
+        }
 
         public MsMatch(String s) {
             String[] data = s.split(" ");
